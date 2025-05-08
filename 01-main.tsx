@@ -10,7 +10,7 @@ export class RocketRatingElement extends HTMLElement {
   #subscription: Subscription | null = null
 
   connectedCallback() {
-    this.innerHTML = '' // INFO: Quickly clear out the "No JS" message
+    this.innerHTML = ''
     this.#subscription = run(this, RocketRating)
   }
 
@@ -20,5 +20,4 @@ export class RocketRatingElement extends HTMLElement {
   }
 }
 
-// INFO: Register the custom element with the browser
 customElements.define('rocket-rating', RocketRatingElement)
