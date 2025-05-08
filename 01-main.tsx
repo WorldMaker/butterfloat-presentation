@@ -1,9 +1,33 @@
-import { run, Empty } from 'butterfloat'
+import { jsx, run } from 'butterfloat'
 import type { Subscription } from 'rxjs'
 
-function RocketRating() {
-  // TODO: Implement the RocketRating component
-  return Empty()
+interface RocketProps {
+  highlight: boolean
+}
+
+function Rocket({ highlight }: RocketProps) {
+  return (
+    // NOTE: Real `class` rather than `className`
+    <span class={highlight ? 'icon is-large has-text-danger' : 'icon is-large'}>
+      <i class="fa-duotone fa-regular fa-rocket fa-2x" />
+    </span>
+  )
+}
+
+interface RocketRatingProps {
+  initialRating: number
+}
+
+function RocketRating({ initialRating }: RocketRatingProps) {
+  return (
+    <div>
+      <Rocket highlight={initialRating >= 1} />
+      <Rocket highlight={initialRating >= 2} />
+      <Rocket highlight={initialRating >= 3} />
+      <Rocket highlight={initialRating >= 4} />
+      <Rocket highlight={initialRating >= 5} />
+    </div>
+  )
 }
 
 export class RocketRatingElement extends HTMLElement {
@@ -11,7 +35,14 @@ export class RocketRatingElement extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = ''
-    this.#subscription = run(this, RocketRating)
+    // INFO: Grab an initial rating from an attribute
+    const initialRating = parseInt(
+      this.getAttribute('initial-rating') ?? '0',
+      10,
+    )
+    this.#subscription = run(this, () => (
+      <RocketRating initialRating={initialRating} />
+    ))
   }
 
   disconnectedCallback() {
