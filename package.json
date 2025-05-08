@@ -1,5 +1,9 @@
 {
   "dependencies": {
     "butterfloat": "^1.6.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   }
 }
