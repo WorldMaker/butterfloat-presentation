@@ -1,3 +1,14 @@
+import {
+  buildStamp,
+  makeTestComponentContext,
+  makeTestEvent,
+} from 'butterfloat'
+import { JSDOM } from 'jsdom'
+import { writeFile } from 'node:fs/promises'
+import { NEVER } from 'rxjs'
+import { RocketRatingVm } from './02-vm.js'
+
+const dom = new JSDOM(`
 <!doctype html>
 <html>
   <head>
@@ -35,13 +46,31 @@
         <p>You will need JS enabled and loaded to view this component.</p>
       </rocket-rating>
     </section>
-
-    <template id="rocket-stamp"
-      ><span class="icon is-large" data-bf-bind="0"
-        ><i
-          class="fa-duotone fa-regular fa-rocket fa-2x"
-          data-bf-bind="1"
-        ></i></span
-    ></template>
   </body>
 </html>
+`)
+
+const { window } = dom
+const { customElements, document, HTMLElement } = window
+globalThis.customElements = {
+  ...customElements,
+  define: () => {},
+}
+globalThis.HTMLElement = HTMLElement
+
+const { context: testRocketContext } = makeTestComponentContext({
+  hover: makeTestEvent<MouseEvent>(NEVER),
+  click: makeTestEvent<MouseEvent>(NEVER),
+})
+
+// imported dynamically for the `globalThis` context to work
+const { Rocket } = await import('./01-main.js')
+const rocketTree = Rocket(
+  { rank: -999, vm: new RocketRatingVm(-1) },
+  testRocketContext,
+)
+const rocketStamp = buildStamp(rocketTree, document)
+rocketStamp.id = 'rocket-stamp'
+document.body.append(rocketStamp)
+
+await writeFile('00-index.html', dom.serialize())

@@ -2,7 +2,8 @@ import {
   type ComponentContext,
   jsx,
   type ObservableEvent,
-  run,
+  runStamps,
+  StampCollection,
 } from 'butterfloat'
 import { map, type Subscription } from 'rxjs'
 import { RocketRatingVm } from './02-vm.js'
@@ -17,7 +18,7 @@ interface RocketEvents {
   hover: ObservableEvent<MouseEvent>
 }
 
-function Rocket(
+export function Rocket(
   { rank, vm }: RocketProps,
   { bindImmediateEffect, events }: ComponentContext<RocketEvents>,
 ) {
@@ -77,6 +78,15 @@ function RocketRating(
 
 export class RocketRatingElement extends HTMLElement {
   #subscription: Subscription | null = null
+  static #rocketStamp: HTMLTemplateElement | null = null
+
+  constructor() {
+    super()
+    RocketRatingElement.#rocketStamp ??=
+      this.ownerDocument.querySelector<HTMLTemplateElement>(
+        'template#rocket-stamp',
+      )
+  }
 
   connectedCallback() {
     this.innerHTML = ''
@@ -84,9 +94,16 @@ export class RocketRatingElement extends HTMLElement {
       this.getAttribute('initial-rating') ?? '0',
       10,
     )
-    this.#subscription = run(this, () => (
-      <RocketRating initialRating={initialRating} />
-    ))
+    // INFO: StampCollection for static HTML templates
+    const stamps = new StampCollection()
+    if (RocketRatingElement.#rocketStamp) {
+      stamps.registerOnlyStamp(Rocket, RocketRatingElement.#rocketStamp!)
+    }
+    this.#subscription = runStamps(
+      this,
+      () => <RocketRating initialRating={initialRating} />,
+      stamps,
+    )
   }
 
   disconnectedCallback() {
