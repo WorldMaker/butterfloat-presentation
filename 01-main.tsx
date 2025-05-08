@@ -1,24 +1,15 @@
 import {
-  butterfly,
   type ComponentContext,
   jsx,
   type ObservableEvent,
   run,
 } from 'butterfloat'
-import {
-  combineLatest,
-  map,
-  shareReplay,
-  type Observable,
-  type Subscription,
-} from 'rxjs'
+import { map, type Subscription } from 'rxjs'
+import { RocketRatingVm } from './02-vm.js'
 
 interface RocketProps {
   rank: number
-  rating: Observable<number>
-  hoverRating: Observable<number>
-  onClick: (rank: number) => void
-  onHover: (rank: number) => void
+  vm: RocketRatingVm
 }
 
 interface RocketEvents {
@@ -27,24 +18,22 @@ interface RocketEvents {
 }
 
 function Rocket(
-  { rank, rating, hoverRating, onClick, onHover }: RocketProps,
+  { rank, vm }: RocketProps,
   { bindImmediateEffect, events }: ComponentContext<RocketEvents>,
 ) {
-  // INFO: This looks like useEffect, but isn't
-  bindImmediateEffect(events.click, () => onClick(rank))
-  bindImmediateEffect(events.hover, () => onHover(rank))
+  bindImmediateEffect(events.click, () => vm.saveRating(rank))
+  bindImmediateEffect(events.hover, () => vm.updateHoverRating(rank))
 
-  const bothRatings = combineLatest([hoverRating, rating]).pipe(shareReplay(1))
-  const isSelected = bothRatings.pipe(
+  const isSelected = vm.bothRatings.pipe(
     map(
       ([rating, current]) =>
         current >= rank && (rating === 0 || rating >= current),
     ),
   )
-  const isHovered = bothRatings.pipe(
+  const isHovered = vm.bothRatings.pipe(
     map(([rating, current]) => rating >= rank && rating !== current),
   )
-  const isSwapped = rating.pipe(map((r) => rank > r))
+  const isSwapped = vm.rating.pipe(map((r) => rank > r))
 
   return (
     <span
@@ -77,22 +66,11 @@ function RocketRating(
   { initialRating }: RocketRatingProps,
   { bindImmediateEffect, events }: ComponentContext<RocketRatingEvents>,
 ) {
-  // INFO: This looks like useState, but isn't
-  const [rating, setRating] = butterfly(initialRating)
-  const [hoverRating, setHoverRating] = butterfly(0)
+  const vm = new RocketRatingVm(initialRating)
 
-  // INFO: This looks like useEffect, but isn't
-  bindImmediateEffect(events.leave, () => setHoverRating(0))
+  bindImmediateEffect(events.leave, () => vm.updateHoverRating(0))
 
-  const rockets = [1, 2, 3, 4, 5].map((rank) => (
-    <Rocket
-      rank={rank}
-      rating={rating}
-      onClick={setRating}
-      hoverRating={hoverRating}
-      onHover={setHoverRating}
-    />
-  ))
+  const rockets = [1, 2, 3, 4, 5].map((rank) => <Rocket rank={rank} vm={vm} />)
 
   return <div events={{ mouseout: events.leave }}>{rockets}</div>
 }
