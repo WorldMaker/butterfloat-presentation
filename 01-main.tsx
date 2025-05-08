@@ -30,7 +30,6 @@ function Rocket(
   { rank, rating, hoverRating, onClick, onHover }: RocketProps,
   { bindImmediateEffect, events }: ComponentContext<RocketEvents>,
 ) {
-  // INFO: This looks like useEffect, but isn't
   bindImmediateEffect(events.click, () => onClick(rank))
   bindImmediateEffect(events.hover, () => onHover(rank))
 
@@ -77,11 +76,9 @@ function RocketRating(
   { initialRating }: RocketRatingProps,
   { bindImmediateEffect, events }: ComponentContext<RocketRatingEvents>,
 ) {
-  // INFO: This looks like useState, but isn't
   const [rating, setRating] = butterfly(initialRating)
   const [hoverRating, setHoverRating] = butterfly(0)
 
-  // INFO: This looks like useEffect, but isn't
   bindImmediateEffect(events.leave, () => setHoverRating(0))
 
   const rockets = [1, 2, 3, 4, 5].map((rank) => (
