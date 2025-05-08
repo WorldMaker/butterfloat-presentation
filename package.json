@@ -1,0 +1,17 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "start": "npm run watch",
+    "prettier": "prettier --write .",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "butterfloat": "^1.6.1"
+  },
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
+}
