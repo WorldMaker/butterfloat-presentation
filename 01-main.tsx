@@ -7,7 +7,6 @@ interface RocketProps {
 
 function Rocket({ highlight }: RocketProps) {
   return (
-    // NOTE: Real `class` rather than `className`
     <span class={highlight ? 'icon is-large has-text-danger' : 'icon is-large'}>
       <i class="fa-duotone fa-regular fa-rocket fa-2x" />
     </span>
@@ -35,7 +34,6 @@ export class RocketRatingElement extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = ''
-    // INFO: Grab an initial rating from an attribute
     const initialRating = parseInt(
       this.getAttribute('initial-rating') ?? '0',
       10,
